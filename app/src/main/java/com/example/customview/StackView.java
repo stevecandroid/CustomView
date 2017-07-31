@@ -123,6 +123,7 @@ public class StackView extends FrameLayout {
         this.mAdapter = adapter;
         mAdapter.registerObserver(new ItemObserver());
         mAdapter.mObserver.notifyChanged();
+
     }
 
     public static abstract class Adapter<VH extends ViewHolder>{
@@ -169,14 +170,13 @@ public class StackView extends FrameLayout {
     public  class ItemObserver extends DataSetObserver{
         @Override
         public void onChanged() {
-            StackView.this.removeAllViews();
+            StackView.this.removeAllViewsInLayout();
             for( int i = 0 ;  i < mAdapter.getItemtCount(); i++) {
                 ViewHolder holder = mAdapter.onCreateViewHolder(StackView.this);
                 mAdapter.onBindViewHolder(holder,i);
                 addView(holder.itemView);
+                new StackPagertransformer(i,4,getMeasuredWidth(),getMeasuredHeight()).transform(holder.itemView,i,true);
             }
-            
-
         }
     }
 
@@ -184,12 +184,13 @@ public class StackView extends FrameLayout {
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
 
         super.onLayout(changed, left, top, right, bottom);
-
+//        mAdapter.mObserver.notifyChanged();
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        mAdapter.mObserver.notifyChanged();
         measureChildren(widthMeasureSpec,heightMeasureSpec);
 
         startPoint.x = 0;

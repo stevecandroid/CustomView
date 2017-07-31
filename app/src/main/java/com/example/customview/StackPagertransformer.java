@@ -27,9 +27,9 @@ public class StackPagertransformer extends StackView.PagerTransformer {
     void transform(View view, float pos, boolean isSwiftLeft) {
 
         view.setPivotX(width/2);
-        view.setPivotY(height);
+        view.setPivotY(0);
         view.setTranslationY(pos*20);
-        view.setTranslationX( width - width*(float) Math.pow(base,pos+1));
+//        view.setTranslationX( width - width*(float) Math.pow(base,pos+1));
         Log.e("StackPagertransformer",height +"");
         view.setScaleX((float) Math.pow(base,pos+1));
         view.setScaleY(0.8f);
