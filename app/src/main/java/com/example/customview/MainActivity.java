@@ -36,6 +36,22 @@ public class MainActivity extends AppCompatActivity {
         args.add(2);
         args.add(3);
         args.add(4);
+        args.add(5);
+        args.add(1);
+        args.add(2);
+        args.add(3);
+        args.add(4);
+        args.add(5);
+        args.add(1);
+        args.add(2);
+        args.add(3);
+        args.add(4);
+        args.add(5);
+        args.add(1);
+        args.add(2);
+        args.add(3);
+        args.add(4);
+        args.add(5);
         StackView stackView = (StackView) findViewById(R.id.stack_view);
          a = new StackAdapter(args);
         stackView.setAdapter(a);
@@ -57,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public StackHolder onCreateViewHolder(ViewGroup parent) {
+            public StackHolder onCreateViewHolder(ViewGroup parent , int pos) {
                 View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.abc,parent,false);
                 return new StackHolder(view);
             }
@@ -73,6 +89,9 @@ public class MainActivity extends AppCompatActivity {
                     ((StackHolder) holder).card.setBackgroundColor(Color.YELLOW);
                 }else if (c== 4){
                     ((StackHolder) holder).card.setBackgroundColor(Color.GRAY);
+                }else{
+                    ((StackHolder) holder).card.setBackgroundColor(Color.BLACK);
+
                 }
                 ((StackHolder) holder).im.setText(pos+"");
 
@@ -82,6 +101,11 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public int getItemtCount() {
                 return args.size();
+            }
+
+            @Override
+            public void onPop(int position) {
+                args.remove(position);
             }
 
             public class StackHolder extends StackView.ViewHolder{

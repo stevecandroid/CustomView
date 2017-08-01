@@ -1,8 +1,13 @@
 package com.example.customview;
 
+import android.support.annotation.FloatRange;
+import android.support.annotation.Size;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
+
+import static android.R.attr.width;
 
 /**
  * Created by 铖哥 on 2017/7/31.
@@ -10,29 +15,47 @@ import android.view.ViewGroup;
 
 public class StackPagertransformer extends StackView.PagerTransformer {
 
-    float pos ;
     int StackSize;
-    double base = Math.sqrt(Math.sqrt(0.6/0.9));
-    int width ;
-    int height;
+    double base ;
+    float minScale ;
+    float maxScale;
 
-    public StackPagertransformer(float pos, int stackSize, int width , int height) {
-        this.pos = pos;
+
+    public StackPagertransformer(int stackSize, @FloatRange(from = 0,to = 1,fromInclusive = false) float minScale , @FloatRange(from = 0,to = 1,fromInclusive = false) float maxScale) {
         StackSize = stackSize;
-        this.width=width;
-        this.height  =height;
+        this.minScale=minScale;
+        this.maxScale  =maxScale;
+
+        if(maxScale < minScale){
+            throw new IllegalArgumentException("maxScale shoulde bigger than minScale");
+        }
+
+        base = Math.sqrt(Math.sqrt(minScale/maxScale));
+
+    }
+
+    public StackPagertransformer(){
+        this(5,0.8f,0.85f);
     }
 
     @Override
-    void transform(View view, float pos, boolean isSwiftLeft) {
+    void transform( View view , float state, boolean isSwiftLeft) {
 
-        view.setPivotX(width/2);
+       View parent = (View) view.getParent();
+        int width = parent.getMeasuredWidth();
+        int height = parent.getMeasuredHeight();
+        int itemPos = (int) view.getTag();
+        view.setPivotX(width / 2);
         view.setPivotY(0);
-        view.setTranslationY(pos*20);
-//        view.setTranslationX( width - width*(float) Math.pow(base,pos+1));
-        Log.e("StackPagertransformer",height +"");
-        view.setScaleX((float) Math.pow(base,pos+1));
-        view.setScaleY(0.8f);
+        view.setTranslationY(20);
+
+        if(state >=  0) {
+            view.setScaleY(((float) Math.pow(base, StackSize - itemPos) * maxScale));
+            view.setScaleX(((float) Math.pow(base, itemPos ) * maxScale));
+        }else if(state < 0 && state > -1 ){
+            view.setScaleY(((float) Math.pow(base,  StackSize - itemPos - state) * maxScale));
+            view.setScaleX(((float) Math.pow(base, itemPos + state ) * maxScale));
+        }
 
     }
 }
