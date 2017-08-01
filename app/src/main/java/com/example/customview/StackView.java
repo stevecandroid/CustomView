@@ -31,16 +31,13 @@ public class StackView extends FrameLayout {
 
     public static final int GAP = 20;
     public static final int MAX_PAGES_COUNT = 8;
-
+    List<PagerTransformer> transformers;
     private ViewDragHelper mDragHelper;
-
     private Adapter mAdapter;
+    private Point startPoint;
 
-    private Point startPoint ;
-
-    private PagerTransformer pagerTransformer;
-
-    private boolean needRemoved = false ;
+    private boolean needRemoved = false;
+    private View preCapturedView = null;
 
     public StackView(@NonNull Context context) {
         super(context);
@@ -52,9 +49,9 @@ public class StackView extends FrameLayout {
         mDragHelper = ViewDragHelper.create(this, 1.0f, new ViewDragHelper.Callback() {
             @Override
             public boolean tryCaptureView(View child, int pointerId) {
-                if((int)child.getTag() == 0 || child.getTag()==null) {
+                if ((int) child.getTag() == 0 || child.getTag() == null) {
                     return true;
-                }else{
+                } else {
                     return false;
                 }
                 //tryCaptureView如果返回ture则表示可以捕获该view，
@@ -69,10 +66,9 @@ public class StackView extends FrameLayout {
 
             @Override
             public void onViewPositionChanged(View changedView, int left, int top, int dx, int dy) {
-//                Log.e("StackView",left+"POSITION CHANGED");
                 int range = getMeasuredWidth();
-                
-                transformPage(changedView , (float) ((left+0.0)/range), left<0);
+
+                transformPage(changedView, (float) ((left + 0.0) / range), left < 0);
                 super.onViewPositionChanged(changedView, left, top, dx, dy);
             }
 
@@ -99,18 +95,17 @@ public class StackView extends FrameLayout {
             //松手回调
             @Override
             public void onViewReleased(View releasedChild, float xvel, float yvel) {
-                Log.e("StackView",releasedChild.getWidth() + " " + releasedChild.getLeft());
 
-                if( Math.abs(releasedChild.getLeft()) < releasedChild.getWidth()/2 && releasedChild.getLeft() < 0 ||
-                        releasedChild.getLeft() > 0 && releasedChild.getRight() < getWidth()+releasedChild.getWidth()/2){
-                    mDragHelper.settleCapturedViewAt(startPoint.x,startPoint.y);
+                if (Math.abs(releasedChild.getLeft()) < releasedChild.getWidth() / 2 && releasedChild.getLeft() < 0 ||
+                        releasedChild.getLeft() > 0 && releasedChild.getRight() < getWidth() + releasedChild.getWidth() / 2) {
+                    mDragHelper.settleCapturedViewAt(startPoint.x, startPoint.y);
                     invalidate();
-                }else{
+                } else {
 
-                    if(releasedChild.getLeft()<0){
-                        mDragHelper.settleCapturedViewAt( -releasedChild.getWidth(),getHeight());
-                    }else{
-                        mDragHelper.settleCapturedViewAt( releasedChild.getWidth()+getWidth(),getHeight());
+                    if (releasedChild.getLeft() < 0) {
+                        mDragHelper.settleCapturedViewAt(-releasedChild.getWidth(), getHeight());
+                    } else {
+                        mDragHelper.settleCapturedViewAt(releasedChild.getWidth() + getWidth(), getHeight());
                     }
                     needRemoved = true;
                     invalidate();
@@ -125,17 +120,16 @@ public class StackView extends FrameLayout {
         super(context, attrs, defStyleAttr);
     }
 
-    private View preCapturedView = null;
-
     @Override
     public void computeScroll() {
         if (mDragHelper.continueSettling(true)) {
             invalidate();
-        }else {
-            if(needRemoved) {
+        } else {
+            if (needRemoved) {
                 removeView(preCapturedView);
+                viewHolderList.remove(0);
                 preCapturedView = null;
-                mAdapter.onPop(0);
+                mAdapter.onPop(0,getChildCount());
 //                for (int i = 0; i < getChildCount(); i++) {
 //                    getChildAt(i).setTag((int)getChildAt(i).getTag()-1);
 //                }
@@ -144,84 +138,17 @@ public class StackView extends FrameLayout {
         }
     }
 
-
-
-    public void setAdapter(Adapter adapter){
+    public void setAdapter(Adapter adapter) {
         this.mAdapter = adapter;
         mAdapter.registerObserver(new ItemObserver());
+        viewHolderList = null;
         mAdapter.mObserver.notifyChanged();
-
-    }
-
-
-    public static abstract class Adapter<VH extends ViewHolder>{
-
-        private ItemObservable mObserver = new ItemObservable();
-
-        public abstract VH onCreateViewHolder(ViewGroup parent, int pos);
-
-        public abstract void onBindViewHolder(ViewHolder holder , int pos);
-
-        public abstract int getItemtCount();
-
-        public abstract void onPop(int position);
-
-
-        public void registerObserver(DataSetObserver observer){
-            mObserver.registerObserver(observer);
-        }
-
-        public void unregisterObserver(DataSetObserver observer){
-            mObserver.unregisterObserver(observer);
-        }
-
-        public void notifyDataSetChanged (){
-            mObserver.notifyChanged();
-        }
-
-    }
-
-    public static abstract class ViewHolder{
-        private View itemView;
-
-        public ViewHolder(View itemView){
-            this.itemView = itemView;
-        }
-
-        public void setItemId(View view , int id){ view.setTag(id);}
-
-        public int getItemId(View view){ return (int) view.getTag();}
-
-    }
-
-    public static class ItemObservable extends DataSetObservable{
-        @Override
-        public void notifyChanged() {
-            super.notifyChanged();
-        }
-    }
-
-    public  class ItemObserver extends DataSetObserver{
-        @Override
-        public void onChanged() {
-            StackView.this.removeAllViewsInLayout();
-            int itemCount = mAdapter.getItemtCount();
-            for( int i = itemCount-1 ;  i >= 0 ; i--) {
-                ViewHolder holder = mAdapter.onCreateViewHolder(StackView.this , i);
-                mAdapter.onBindViewHolder(holder,i);
-                addView(holder.itemView);
-//                holder.setItemId(holder.itemView,i);
-                holder.itemView.setTag(i);
-                transformPage(holder.itemView,i,true);
-            }
-
-        }
     }
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
 
-        Log.e("StackView","ONLAYOUT");
+        Log.e("StackView", "ONLAYOUT");
         super.onLayout(changed, left, top, right, bottom);
 //        mAdapter.mObserver.notifyChanged();
     }
@@ -229,12 +156,13 @@ public class StackView extends FrameLayout {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        mAdapter.mObserver.notifyChanged();
-        measureChildren(widthMeasureSpec,heightMeasureSpec);
+        if (mAdapter != null)
+            mAdapter.mObserver.notifyChanged();
+        measureChildren(widthMeasureSpec, heightMeasureSpec);
 
         startPoint.x = 0;
         startPoint.y = 0;
-        Log.e("StackView","MEASURE");
+        Log.e("StackView", "MEASURE");
     }
 
     @Override
@@ -252,40 +180,146 @@ public class StackView extends FrameLayout {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        Log.e("StackView","ONDRAW");
+        Log.e("StackView", "ONDRAW");
     }
 
-    public static abstract class PagerTransformer{
+    private void transformPage(View view, float state, boolean isLeft) {
 
-        /**
-         *
-         * @param view //抓住的View Tag内包含其坐标
-         * @param pos //状态 移动中 栈内 移除
-         * @param isSwiftLeft ./没用
-         */
-        abstract  void transform(View view , float pos , boolean isSwiftLeft);
-    }
-
-    private void transformPage(View view , float state , boolean isLeft){
-
-        if(transformers==null){
+        if (transformers == null) {
             transformers = new ArrayList<>();
             transformers.add(new StackPagertransformer()); //DEAFULT
         }
 
         for (int i = 0; i < getChildCount(); i++) {
-            for (PagerTransformer ptf:
-                 transformers) {
-                ptf.transform(getChildAt(i) , state , isLeft);
+            for (PagerTransformer ptf :
+                    transformers) {
+                ptf.transform(getChildAt(i), state, isLeft);
             }
         }
     }
 
-    List<PagerTransformer> transformers;
-
-    public void setPagerTransforer(PagerTransformer... params){
+    public void setPagerTransforer(PagerTransformer... params) {
         transformers = Arrays.asList(params);
     }
 
+    public static abstract class Adapter<VH extends ViewHolder> {
+
+        private ItemObservable mObserver = new ItemObservable();
+
+        public abstract VH onCreateViewHolder(ViewGroup parent, int pos);
+
+        public abstract void onBindViewHolder(ViewHolder holder, int pos);
+
+        public abstract int getItemtCount();
+
+        public abstract void onPop(int position,int size);
+
+        public void registerObserver(DataSetObserver observer) {
+            mObserver.registerObserver(observer);
+        }
+
+        public void unregisterObserver(DataSetObserver observer) {
+            mObserver.unregisterObserver(observer);
+        }
+
+        public void notifyDataSetChanged() {
+            needChangeListHolder = true;
+            mObserver.notifyChanged();
+        }
+    }
+
+    public static abstract class ViewHolder {
+        private View itemView;
+
+        public ViewHolder(View itemView) {
+            this.itemView = itemView;
+        }
+
+        public void setItemId(View view, int id) {
+            view.setTag(id);
+        }
+
+        public int getItemId(View view) {
+            return (int) view.getTag();
+        }
+
+    }
+
+    public static class ItemObservable extends DataSetObservable {
+        @Override
+        public void notifyChanged() {
+            super.notifyChanged();
+        }
+
+        @Override
+        public void notifyInvalidated() {
+            super.notifyInvalidated();
+        }
+    }
+
+    public static abstract class PagerTransformer {
+
+        /**
+         * @param view        //抓住的View Tag内包含其坐标
+         * @param pos         //状态   移动中 栈内 移除
+         * @param isSwiftLeft ./没用
+         */
+        abstract void transform(View view, float pos, boolean isSwiftLeft);
+    }
+
+    private int SHOW_PAGER_COUNT = 4; //default;
+    private List<ViewHolder> viewHolderList = null;
+    private static boolean needChangeListHolder = false;
+
+    public class ItemObserver extends DataSetObserver {
+        @Override
+        public void onChanged() {
+            StackView.this.removeAllViewsInLayout();
+//            int itemCount = mAdapter.getItemtCount();
+//            viewHolderList = new ArrayList<>();
+////            if(viewHolderList.size()==0)
+//
+//            removeAllViews();
+//            for (int i = itemCount -1; i >= 0 ; i--) {
+//                ViewHolder holder = mAdapter.onCreateViewHolder(StackView.this, i);
+////                mAdapter.onBindViewHolder(holder, i);
+////                addView(holder.itemView);
+////                holder.itemView.setTag(i);
+//                viewHolderList.add(holder);
+////                viewHolderList.add(holder);
+////                transformPage(holder.itemView, i, true);
+//            }
+//            onInvalidated();
+////            for(int i = itemCount -1 - curTopPosition ; i > itemCount-5 &&  i>=0 ; i--){
+////                View itemView  = viewHolderList.get(i).itemView;
+////                mAdapter.onBindViewHolder(viewHolderList.get(i), i);
+////                addView(itemView);
+////                transformPage(itemView,i,true);
+////            }
+            int itemCount = mAdapter.getItemtCount();
+            if(viewHolderList == null || needChangeListHolder) {
+                viewHolderList = new ArrayList<>();
+                for (int i = 0; i < itemCount; i++) {
+                    ViewHolder holder = mAdapter.onCreateViewHolder(StackView.this, i);
+                    viewHolderList.add(holder);
+                }
+            }
+
+            for(int i = SHOW_PAGER_COUNT -1 ; i >= 0 ; i--){
+                if(i < viewHolderList.size()) {
+                    ViewHolder holder = viewHolderList.get(i);
+                    mAdapter.onBindViewHolder(holder, i);
+                    holder.itemView.setTag(i);
+                    addView(holder.itemView);
+                    transformPage(holder.itemView, i, true);
+                }
+            }
+        }
+
+    }
+
+    public void setShowPagerCount(int count ){
+        this.SHOW_PAGER_COUNT = count;
+    }
 
 }

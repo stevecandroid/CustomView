@@ -37,22 +37,11 @@ public class MainActivity extends AppCompatActivity {
         args.add(3);
         args.add(4);
         args.add(5);
-        args.add(1);
-        args.add(2);
-        args.add(3);
-        args.add(4);
-        args.add(5);
-        args.add(1);
-        args.add(2);
-        args.add(3);
-        args.add(4);
-        args.add(5);
-        args.add(1);
-        args.add(2);
-        args.add(3);
-        args.add(4);
-        args.add(5);
+        args.add(6);
+        args.add(7);
+        args.add(8);
         StackView stackView = (StackView) findViewById(R.id.stack_view);
+        stackView.setShowPagerCount(2);
          a = new StackAdapter(args);
         stackView.setAdapter(a);
 
@@ -93,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
                     ((StackHolder) holder).card.setBackgroundColor(Color.BLACK);
 
                 }
-                ((StackHolder) holder).im.setText(pos+"");
+                ((StackHolder) holder).im.setText(args.get(pos)+"");
 
             }
 
@@ -104,8 +93,16 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onPop(int position) {
+            public void onPop(int position,int size) {
                 args.remove(position);
+                if(size==0){
+                    args.add(1);
+                    args.add(2);
+                    args.add(3);
+                    args.add(4);
+                    notifyDataSetChanged();
+                }
+
             }
 
             public class StackHolder extends StackView.ViewHolder{

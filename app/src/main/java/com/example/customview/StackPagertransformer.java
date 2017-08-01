@@ -15,11 +15,14 @@ import static android.R.attr.width;
 
 public class StackPagertransformer extends StackView.PagerTransformer {
 
-    int StackSize;
-    double base ;
-    float minScale ;
-    float maxScale;
+    private int StackSize;
+    private double base ;
+    private float minScale ;
+    private float maxScale;
 
+    public static final float DEFAULT_SCALEY = 0.95f;
+    public static final float DEFAULT_SCALEX = 0.9f;
+    public static final int DEFAULT_TRANSLATIONY = 20;
 
     public StackPagertransformer(int stackSize, @FloatRange(from = 0,to = 1,fromInclusive = false) float minScale , @FloatRange(from = 0,to = 1,fromInclusive = false) float maxScale) {
         StackSize = stackSize;
@@ -35,7 +38,7 @@ public class StackPagertransformer extends StackView.PagerTransformer {
     }
 
     public StackPagertransformer(){
-        this(5,0.8f,0.85f);
+        this(4,0.8f,0.85f);
     }
 
     @Override
@@ -44,17 +47,17 @@ public class StackPagertransformer extends StackView.PagerTransformer {
        View parent = (View) view.getParent();
         int width = parent.getMeasuredWidth();
         int height = parent.getMeasuredHeight();
-        int itemPos = (int) view.getTag();
+        int itemState = (int) view.getTag();
         view.setPivotX(width / 2);
         view.setPivotY(0);
-        view.setTranslationY(20);
+        view.setTranslationY(DEFAULT_TRANSLATIONY);
 
         if(state >=  0) {
-            view.setScaleY(((float) Math.pow(base, StackSize - itemPos) * maxScale));
-            view.setScaleX(((float) Math.pow(base, itemPos ) * maxScale));
+            view.setScaleY(((float) Math.pow(base, StackSize - itemState) * DEFAULT_SCALEY));
+            view.setScaleX(((float) Math.pow(base, itemState ) * DEFAULT_SCALEX));
         }else if(state < 0 && state > -1 ){
-            view.setScaleY(((float) Math.pow(base,  StackSize - itemPos - state) * maxScale));
-            view.setScaleX(((float) Math.pow(base, itemPos + state ) * maxScale));
+            view.setScaleY(((float) Math.pow(base,  StackSize - itemState - state) * DEFAULT_SCALEY));
+            view.setScaleX(((float) Math.pow(base, itemState + state ) * DEFAULT_SCALEX));
         }
 
     }
