@@ -5,12 +5,23 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.example.customview.StackView
+    <com.example.customview.VIEW1.StackView
         android:id="@+id/stack_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:visibility="gone">
 
-    </com.example.customview.StackView>
+    </com.example.customview.VIEW1.StackView>
+
+    <com.example.customview.VIEW2.QqBubble
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone" />
+
+    <com.example.customview.VIEW3.Lock
+        android:id="@+id/lock"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
 
 </LinearLayout>

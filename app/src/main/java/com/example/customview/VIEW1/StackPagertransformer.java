@@ -1,13 +1,7 @@
-package com.example.customview;
+package com.example.customview.VIEW1;
 
 import android.support.annotation.FloatRange;
-import android.support.annotation.Size;
-import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewParent;
-
-import static android.R.attr.width;
 
 /**
  * Created by 铖哥 on 2017/7/31.

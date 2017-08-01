@@ -1,4 +1,4 @@
-package com.example.customview;
+package com.example.customview.VIEW1;
 
 import android.content.Context;
 import android.database.DataSetObservable;
@@ -9,19 +9,16 @@ import android.support.annotation.AttrRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.ViewDragHelper;
-import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.Scroller;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Stack;
 
 /**
  * Created by 铖哥 on 2017/7/31.

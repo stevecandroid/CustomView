@@ -1,20 +1,17 @@
 package com.example.customview;
 
 import android.graphics.Color;
-import android.os.Handler;
-import android.os.Message;
-import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowInsets;
-import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.example.customview.VIEW1.StackView;
+import com.example.customview.VIEW3.Lock;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,6 +47,14 @@ public class MainActivity extends AppCompatActivity {
 //        im.setPivotX(getWindow().getDecorView().getWidth()/2);
 //        im.setScaleX(0.5f);
 //        Log.e("MainActivity",getWindow().getDecorView().getWidth()/2+"WIDTH");
+
+        Lock lock = (Lock) findViewById(R.id.lock);
+        lock.setOnFinshInputListener(new Lock.onFinshInputListener() {
+            @Override
+            public void onFinish(List<Integer> order) {
+                Log.e("MainActivity",order.size()+"SIZE OF ORDER");
+            }
+        });
 
     };
 
