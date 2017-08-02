@@ -1,6 +1,12 @@
 package com.example.customview;
 
+import android.Manifest;
+import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
@@ -22,6 +28,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.acitivty_main);
+
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
+            ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},1);
+        }
 
 //        MyViewGroup2 vg = (MyViewGroup2) findViewById(R.id.vg);
 //        View view = LayoutInflater.from(this).inflate(R.layout.abc,null);
@@ -48,11 +58,18 @@ public class MainActivity extends AppCompatActivity {
 //        im.setScaleX(0.5f);
 //        Log.e("MainActivity",getWindow().getDecorView().getWidth()/2+"WIDTH");
 
-        Lock lock = (Lock) findViewById(R.id.lock);
+        final Lock lock = (Lock) findViewById(R.id.lock);
         lock.setOnFinshInputListener(new Lock.onFinshInputListener() {
             @Override
-            public void onFinish(List<Integer> order) {
-                Log.e("MainActivity",order.size()+"SIZE OF ORDER");
+            public void onFinish(boolean isSecretSetup, boolean isCorrect, List<Integer> results) {
+                Log.e("MainActivity", "isUP = " + isSecretSetup + " is Correct = " + isCorrect + "  resultSize = " + results.size() );
+                if(!isSecretSetup){
+                    lock.setSecret(results);
+                }
+                
+                if(isCorrect){
+                    // TODO: 2017/8/2  do sth
+                }
             }
         });
 
@@ -123,6 +140,11 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if(requestCode == 1 ){
 
+        }
+    }
 }
 
