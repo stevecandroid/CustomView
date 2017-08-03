@@ -65,7 +65,6 @@ public class Myinterpolator {
                                     isIncrease = true;
                                 }
                             }
-                            Log.e("Myinterpolator", isIncrease + "");
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -80,7 +79,6 @@ public class Myinterpolator {
                     while (begin) {
                         try {
                             Thread.sleep(5);
-                            Log.e("Myinterpolator", isIncrease + "");
                             if (isIncrease) {
                                 curfrom.cX += pieceX;
                                 curfrom.cY += pieceY;
@@ -95,7 +93,6 @@ public class Myinterpolator {
                                     isIncrease = true;
                                 }
                             }
-                            Log.e("Myinterpolator", isIncrease + "");
                         } catch (Exception e) {
                             e.printStackTrace();
                         }

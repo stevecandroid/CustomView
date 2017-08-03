@@ -1,10 +1,13 @@
 package com.example.customview;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
+import android.graphics.Rect;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -53,7 +56,11 @@ public class Loading extends View{
 
     @Override
     protected void onDraw(Canvas canvas) {
-        drawCircles(canvas,circleList);
+        if(finished){
+            drawCheck(canvas);
+        }else {
+            drawCircles(canvas, circleList);
+        }
     }
 
     class Circle{
@@ -73,10 +80,29 @@ public class Loading extends View{
 
     }
 
+    int t = 0 ;
+    Bitmap bitmap = BitmapFactory.decodeResource(getResources(),R.drawable.checkmark);
+    private void drawCheck(Canvas canvas){
+        Rect dest = new Rect(0,0,getWidth(),getHeight());
+        Rect src = new Rect( t*bitmap.getWidth()/13,0,(t+1)*bitmap.getWidth()/13,bitmap.getHeight());
+        canvas.drawBitmap(bitmap,src,dest,null);
+        if(t < 12) {
+            postInvalidateDelayed(30);
+        }
+        t++;
+    }
+
     private void drawCircle(Canvas canvas , Circle c){
 
-
-        mPiant.setColor(c.color-0xff);
+        if(isFinishing) {
+//            if(c.color > 0x00ffffff){
+//                c.color = Color.argb(1,255,255,255);
+//            }
+//            System.out.printf("%x",c.color);
+                mPiant.setColor(c.color -= 0x4000000);//
+        }else{
+            mPiant.setColor(c.color);
+        }
         canvas.drawCircle(c.cX, c.cY, c.radius, mPiant);
     }
 
@@ -84,7 +110,7 @@ public class Loading extends View{
         for(Circle c : circles){
             drawCircle(canvas,c);
         }
-        invalidate();
+        postInvalidateDelayed(10);
     }
 
     @Override
@@ -100,7 +126,6 @@ public class Loading extends View{
             height = width = 100;
             setMeasuredDimension(height,height);
         }
-
 
         if(circleList==null){
             circleList = new ArrayList<>();
@@ -130,21 +155,31 @@ public class Loading extends View{
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
+        exit();
+    }
+
+    private void exit(){
         ip.exit();
         ip2.exit();
         ip3.exit();
         ip1.exit();
     }
 
+    boolean finished = false;
     public void finish(){
-
+            isFinishing = true;
         new Thread(new Runnable() {
 
             @Override
             public void run() {
-                while(true) {
+                while(isFinishing) {
                     for (int i = 0; i < circleList.size(); i++) {
-                        circleList.get(i).radius += 2;
+                        circleList.get(i).radius += 15;
+                        if(circleList.get(i).radius > getWidth()/2){
+                            isFinishing = false;
+                            finished = true;
+                            exit();
+                        }
                     }
                     try {
                         Thread.sleep(100);
@@ -157,3 +192,5 @@ public class Loading extends View{
         }).start();
     }
 }
+
+
