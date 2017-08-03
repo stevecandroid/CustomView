@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="Lock">
+
+        <attr name="itemCount" format="integer"/>
+        <attr name="circleRadius" format="integer"/>
+        <attr name="touchColor" format="color"/>
+        <attr name="nonTouchColor" format="color"/>
+        <attr name="lineColor" format="color"/>
+
+    </declare-styleable>
+
+
+</resources>
