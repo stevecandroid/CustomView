@@ -14,6 +14,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.example.customview.VIEW1.StackView;
@@ -37,7 +38,17 @@ public class MainActivity extends AppCompatActivity {
 //        View view = LayoutInflater.from(this).inflate(R.layout.abc,null);
 ////        view.setTranslationY(100);
 //        vg.addView(view);
+
 //
+        final Loading loading = (Loading) findViewById(R.id.loading);
+        Button bt = (Button) findViewById(R.id.button);
+        bt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                loading.finish();
+            }
+        });
+
         List<Integer> args = new ArrayList<>();
         args.add(1);
         args.add(2);

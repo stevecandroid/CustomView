@@ -160,7 +160,7 @@ public class MyView extends View {
                     drawCircle(calculateX(lines.get(i)), canvas);
                 }
 
-                postInvalidate();
+                postInvalidateDelayed(100);
     }
 
     @Override

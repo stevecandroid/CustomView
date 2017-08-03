@@ -5,179 +5,174 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.Point;
-import android.support.annotation.Nullable;
+import android.graphics.PointF;
 import android.util.AttributeSet;
-import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
 
-import java.util.Vector;
-
-/**
- * Created by 铖哥 on 2017/8/1.
- */
-
 public class QqBubble extends View {
+    private static final float C = 0.551915024494f;     // 一个常量，用来计算绘制圆形贝塞尔曲线控制点的位置
 
-    public static final int DEFAULT_WIDTH = 500;
-    public static final int DEFAULT_HEIGHT = 500;
+    private Paint mPaint;
+    private int mCenterX, mCenterY;
 
-    private int width ;
-    private int height ;
+    private PointF mCenter = new PointF(0,0);
+    private float mCircleRadius = 200;                  // 圆的半径
+    private float mDifference = mCircleRadius*C;        // 圆形的控制点与数据点的差值
 
-    private Paint mPiant = new Paint();
+    private float[] mData = new float[8];               // 顺时针记录绘制圆形的四个数据点
+    private float[] mCtrl = new float[16];              // 顺时针记录绘制圆形的八个控制点
+
+    private float mDuration = 1000;                     // 变化总时长
+    private float mCurrent = 0;                         // 当前已进行时长
+    private float mCount = 100;                         // 将时长总共划分多少份
+    private float mPiece = mDuration/mCount;            // 每一份的时长
+
 
     public QqBubble(Context context) {
-        super(context);
+        this(context, null);
+
     }
 
-    public QqBubble(Context context, @Nullable AttributeSet attrs) {
+    public QqBubble(Context context, AttributeSet attrs) {
         super(context, attrs);
 
-        mPiant.setColor(Color.RED);
-        mPiant.setStyle(Paint.Style.FILL);
-        mPiant.setAntiAlias(true);
-        path = new Path();
+        mPaint = new Paint();
+        mPaint.setColor(Color.BLACK);
+        mPaint.setStrokeWidth(8);
+        mPaint.setStyle(Paint.Style.STROKE);
+        mPaint.setTextSize(60);
+
+
+        // 初始化数据点
+
+        mData[0] = 0;
+        mData[1] = mCircleRadius;
+
+        mData[2] = mCircleRadius;
+        mData[3] = 0;
+
+        mData[4] = 0;
+        mData[5] = -mCircleRadius;
+
+        mData[6] = -mCircleRadius;
+        mData[7] = 0;
+
+        // 初始化控制点
+
+        mCtrl[0]  = mData[0]+mDifference;
+        mCtrl[1]  = mData[1];
+
+        mCtrl[2]  = mData[2];
+        mCtrl[3]  = mData[3]+mDifference;
+
+        mCtrl[4]  = mData[2];
+        mCtrl[5]  = mData[3]-mDifference;
+
+        mCtrl[6]  = mData[4]+mDifference;
+        mCtrl[7]  = mData[5];
+
+        mCtrl[8]  = mData[4]-mDifference;
+        mCtrl[9]  = mData[5];
+
+        mCtrl[10] = mData[6];
+        mCtrl[11] = mData[7]-mDifference;
+
+        mCtrl[12] = mData[6];
+        mCtrl[13] = mData[7]+mDifference;
+
+        mCtrl[14] = mData[0]-mDifference;
+        mCtrl[15] = mData[1];
     }
 
-    public QqBubble(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
+
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        mCenterX = w / 2;
+        mCenterY = h / 2;
     }
 
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        drawB(canvas);
-    }
+        drawCoordinateSystem(canvas);       // 绘制坐标系
 
-    float pressX ;
-    float pressY ;
-    Path path ;
-    public void drawB(Canvas canvas){
-        canvas.translate(0,0);
-//        canvas.drawRect(0,0,getWidth(),getHeight(),mPiant);
-//        canvas.translate(getWidth()/2,getHeight()/2);
-//        mPiant.setStyle(Paint.Style.FILL);
-//        canvas.drawCircle(width/2,height/2,50,mPiant);
-//        canvas.drawCircle(pressX,pressY,20,mPiant);
-//        path.moveTo(pressX,pressY-20);
-//        path.quadTo((width/2 - pressX)/2 + pressX , (height/2 - pressY)/2 + pressY,width/2,height/2 - 50);
-//        path.lineTo(width/2,height/2+50);
-//        path.quadTo((width/2 - pressX)/2 + pressX , (height/2 - pressY)/2 + pressY,pressX,pressY+20);
-//        path.close();
-//        canvas.drawPath(path,mPiant);
-        canvas.drawPoint(pressX,pressY,mPiant);
-        path.reset();
-    }
+        canvas.translate(mCenterX, mCenterY); // 将坐标系移动到画布中央
+        canvas.scale(1,-1);                 // 翻转Y轴
 
-    public void drawSB(Canvas canvas , MotionEvent event){
-        float pressX = event.getX();
-        float pressY = event.getY();
-
-    }
-
-    private float calculateK(float x, float y){
-        return (height/2-y)*(width/2-x);
-    }
-
-    @Override
-    public boolean dispatchTouchEvent(MotionEvent event) {
-
-        int act = event.getAction();
-
-        switch (act){
-            case MotionEvent.ACTION_DOWN:
-                return true;
-
-            case MotionEvent.ACTION_MOVE:
-//                pressX = event.getX();
-//                pressY = event.getY();
-//                invalidate();
-                calculate(new Circle(event.getX(),event.getY(),20));
-                break;
-
-            case MotionEvent.ACTION_UP:
-
-                break;
+        drawAuxiliaryLine(canvas);
 
 
-        }
-//        Log.e("QqBubble","X = " + event.getX()+ "  Y = " +event.getY() );
+        // 绘制贝塞尔曲线
+        mPaint.setColor(Color.RED);
+        mPaint.setStrokeWidth(8);
 
+        Path path = new Path();
+        path.moveTo(mData[0],mData[1]);
 
-        return super.dispatchTouchEvent(event);
-    }
+        path.cubicTo(mCtrl[0],  mCtrl[1],  mCtrl[2],  mCtrl[3],     mData[2], mData[3]);
+        path.cubicTo(mCtrl[4],  mCtrl[5],  mCtrl[6],  mCtrl[7],     mData[4], mData[5]);
+        path.cubicTo(mCtrl[8],  mCtrl[9],  mCtrl[10], mCtrl[11],    mData[6], mData[7]);
+        path.cubicTo(mCtrl[12], mCtrl[13], mCtrl[14], mCtrl[15],    mData[0], mData[1]);
 
-    private float calculateRadius(){
-        return 0f;
-    }
+        canvas.drawPath(path, mPaint);
 
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        mCurrent += mPiece;
+        if (mCurrent < mDuration){
 
-        int widthMode = MeasureSpec.getMode(widthMeasureSpec);
-        int heightMode = MeasureSpec.getMode(heightMeasureSpec);
-        width = MeasureSpec.getSize(widthMeasureSpec);
-        height = MeasureSpec.getSize(heightMeasureSpec);
+            mData[1] -= 120/mCount;
+            mCtrl[7] += 80/mCount;
+            mCtrl[9] += 80/mCount;
 
-        if(widthMode == MeasureSpec.AT_MOST){
-            width = DEFAULT_WIDTH;
-        }
+            mCtrl[4] -= 20/mCount;
+            mCtrl[10] += 20/mCount;
 
-        if(heightMode == MeasureSpec.AT_MOST){
-            height = DEFAULT_HEIGHT;
-        }
-        setMeasuredDimension(width,height);
-    }
-
-    public double calculate ( Circle m){
-        Circle n = new Circle(width/2,height/2,50);
-        
-        double d =  Math.hypot( m.y - n.y , m.x - n.x );
-
-        double c2x = d/( (n.radius/m.radius) - 1);
-        double cos = m.radius/c2x;
-//        Log.e("QqBubble", cos+"");
-        double x = m.radius/cos;
-        double y = m.radius/(Math.sqrt(1-cos*cos));
-
-        pressX = (float) x;
-        pressY = (float) y;
-        invalidate();
-
-//        Log.e("QqBubble",cos+"");?
-        Log.e("QqBubble",y+"");
-        return 1d;
-    }
-
-    class Vector {
-
-        Point p1;
-        Point p2;
-
-        public Vector(Point p1, Point p2) {
-            this.p1 = p1;
-            this.p2 = p2;
-        }
-
-        public double getDistance(){
-            return Math.hypot( p1.y - p2.y , p1.x - p2.x );
+            postInvalidateDelayed((long) mPiece);
         }
     }
 
+    // 绘制辅助线
+    private void drawAuxiliaryLine(Canvas canvas) {
+        // 绘制数据点和控制点
+        mPaint.setColor(Color.GRAY);
+        mPaint.setStrokeWidth(20);
 
-    class Circle{
-        public float x;
-        public float y;
-        public float radius;
-
-        public Circle(float x, float y, float radius) {
-            this.x = x;
-            this.y = y;
-            this.radius = radius;
+        for (int i=0; i<8; i+=2){
+            canvas.drawPoint(mData[i],mData[i+1], mPaint);
         }
+
+        for (int i=0; i<16; i+=2){
+            canvas.drawPoint(mCtrl[i], mCtrl[i+1], mPaint);
+        }
+
+
+        // 绘制辅助线
+        mPaint.setStrokeWidth(4);
+
+        for (int i=2, j=2; i<8; i+=2, j+=4){
+            canvas.drawLine(mData[i],mData[i+1],mCtrl[j],mCtrl[j+1],mPaint);
+            canvas.drawLine(mData[i],mData[i+1],mCtrl[j+2],mCtrl[j+3],mPaint);
+        }
+        canvas.drawLine(mData[0],mData[1],mCtrl[0],mCtrl[1],mPaint);
+        canvas.drawLine(mData[0],mData[1],mCtrl[14],mCtrl[15],mPaint);
+    }
+
+    // 绘制坐标系
+    private void drawCoordinateSystem(Canvas canvas) {
+        canvas.save();                      // 绘制做坐标系
+
+        canvas.translate(mCenterX, mCenterY); // 将坐标系移动到画布中央
+        canvas.scale(1,-1);                 // 翻转Y轴
+
+        Paint fuzhuPaint = new Paint();
+        fuzhuPaint.setColor(Color.RED);
+        fuzhuPaint.setStrokeWidth(5);
+        fuzhuPaint.setStyle(Paint.Style.STROKE);
+
+        canvas.drawLine(0, -2000, 0, 2000, fuzhuPaint);
+        canvas.drawLine(-2000, 0, 2000, 0, fuzhuPaint);
+
+        canvas.restore();
     }
 }

@@ -5,4 +5,8 @@
     <color name="colorAccent">#FF4081</color>
     <color name="colorTouch">#009688</color>
     <color name="nonTouch">#607d8b</color>
+    <color name="googleBlue">#4285f4</color>
+    <color name="googleRed">#ea4335</color>
+    <color name="googleYellow">#fbbc05</color>
+    <color name="googleGreen">#34a853</color>
 </resources>

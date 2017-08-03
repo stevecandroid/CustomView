@@ -17,10 +17,12 @@
     <com.example.customview.VIEW2.QqBubble
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone" />
+        android:visibility="gone"
+        />
 
     <com.example.customview.VIEW3.Lock
         android:id="@+id/lock"
+        android:visibility="gone"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:lineColor="@color/colorAccent"
@@ -28,5 +30,20 @@
         app:nonTouchColor="@color/nonTouch"
         android:layout_weight="0.64" />
 
+    <com.example.customview.VIEW4.MySurfaceView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"/>
+
+    <com.example.customview.Loading
+        android:id="@+id/loading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Button" />
 
 </LinearLayout>
